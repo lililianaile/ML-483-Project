@@ -12,6 +12,8 @@ import torchvision
 
 import matplotlib.pyplot as plt
 from IPython import display
+import time
+
 display.set_matplotlib_formats('svg')
 
 adevice = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -163,6 +165,9 @@ print(loss)
 
 # A function that trains the model
 def trainModel(epochs):
+    starttime = int(time.time())
+    print(f"Start Time: {starttime}")
+
     print("training model function called...")
     device = adevice
     print("device set")
@@ -248,6 +253,15 @@ def trainModel(epochs):
         
         # end of epochs
         print("end of epochs")
+        endtime = int(time.time())
+        print(f"End Time: {endtime}")
+        elapsedtime = endtime - starttime
+        elapsedmin = int(elapsedtime / 60)
+        print(elapsedmin)
+
+        elapsedsec = elapsedtime % 60
+        print(elapsedsec)
+        print(f"Elapsed time: {elapsedmin} minutes, {elapsedsec} seconds.")
 
         # function output
         return trainLoss, testLoss, trainErr, testErr, net
