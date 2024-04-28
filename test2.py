@@ -146,5 +146,3 @@ print("Episode{}: Total reward={}".format(episode+1, total_reward))
 
 
 # implement: use test data to check accuracy and visualize it"""
-
- 
