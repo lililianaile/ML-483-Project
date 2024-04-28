@@ -84,7 +84,10 @@ train_data, test_data, train_labels, test_labels = sklearn.model_selection.train
 train_data = TensorDataset(train_data, train_labels)
 test_data = TensorDataset(test_data, test_labels)
 
-batchsize = 8
+
+setbatchsize = input("Enter batch size (8, 16, 32, 64, 128) [Higher batch size = Faster, but more CPU]: ")
+
+batchsize = int(setbatchsize)
 train_loader = DataLoader(train_data, batch_size=batchsize, shuffle=True, drop_last=True)
 test_loader = DataLoader(test_data, batch_size=test_data.tensors[0].shape[0])
 
