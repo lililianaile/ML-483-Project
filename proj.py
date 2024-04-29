@@ -164,7 +164,7 @@ print('\nLoss:')
 print(loss)
 
 # A function that trains the model
-def trainModel(epochs):
+def trainModel(epochs, printing):
     starttime = int(time.time())
     print(f"Start Time: {starttime}")
 
@@ -220,54 +220,52 @@ def trainModel(epochs):
             batchErr.append(torch.mean((torch.argmax(yHat, axis=1) != Y).float()).item())
 
             #print("8")
-            trainLoss[epochi] = np.mean(batchLoss)
-            #print("9")
-            trainErr[epochi] = 100 * np.mean(batchErr)
 
-            #print("10")
-            net.eval()
-            #print("11")
+        # After each epoch, calculate train loss and error
+        trainLoss[epochi] = np.mean(batchLoss)
+        trainErr[epochi] = 100 * np.mean(batchErr)
+
+        # Calculate test loss and error after each epoch
+        net.eval()
+        with torch.no_grad():
             X, Y = next(iter(test_loader))
-
-            #print("12")
             X = X.to(device)
-            #print("13")
             Y = Y.to(device)
 
-            #print("14")
-            with torch.no_grad():
-                #print("14.1")
-                yHat = net(X)
-                #print("14.2")
-                loss = lossfunction(yHat, Y)
-                #print("14.3")
-            
-            #print("15")
-            testLoss[epochi] = loss.item()
-            #print("16")
-            testErr[epochi] = 100 * torch.mean((torch.argmax(yHat, axis=1) != Y).float()).item()
+            yHat = net(X)
+            loss = lossfunction(yHat, Y)
 
+        testLoss[epochi] = loss.item()
+        testErr[epochi] = 100 * torch.mean((torch.argmax(yHat, axis=1) != Y).float()).item()
+
+        if printing:
             print(f"Epoch: {epochi}")
             print(f"testLoss: {testLoss[epochi]}")
             print(f"testErr: {testErr[epochi]}")
-        
-        # end of epochs
-        print("end of epochs")
-        endtime = int(time.time())
-        print(f"End Time: {endtime}")
-        elapsedtime = endtime - starttime
-        elapsedmin = int(elapsedtime / 60)
-        print(elapsedmin)
 
-        elapsedsec = elapsedtime % 60
-        print(elapsedsec)
-        print(f"Elapsed time: {elapsedmin} minutes, {elapsedsec} seconds.")
+    # end of epochs
+    print("end of epochs")
+    endtime = int(time.time())
+    print(f"End Time: {endtime}")
+    elapsedtime = endtime - starttime
+    elapsedmin = int(elapsedtime / 60)
+    print(elapsedmin)
 
-        # function output
-        return trainLoss, testLoss, trainErr, testErr, net
+    elapsedsec = elapsedtime % 60
+    print(elapsedsec)
+    print(f"Elapsed time: {elapsedmin} minutes, {elapsedsec} seconds.")
+
+    # function output
+    return trainLoss, testLoss, trainErr, testErr, net
+
 
 # USAGE
-trainLoss, testLoss, trainErr, testErr, net = trainModel(2)
+numepochs = int(input("Enter number of epochs: "))
+printstatements = input("Do you want to print statements during training? (y/n): ")
+printstatementsTF = False
+if printstatements == "y":
+    printstatementsTF == True
+trainLoss, testLoss, trainErr, testErr, net = trainModel(numepochs, printstatementsTF)
 
 fig, ax = plt.subplots(1, 2, figsize=(16, 5))
 
