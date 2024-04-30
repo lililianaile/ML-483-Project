@@ -24,12 +24,13 @@ downloadTF = False if downloadYN == "n" else True
 dataset = torchvision.datasets.EMNIST(root='emnist', split='letters', download=downloadTF) #download dataset
 
 print(dataset.classes)
-print(str(len(dataset.classes)) + ' classes')
+print(str(len(dataset.classes)) + ' classes') # dataset has 27 classes
 
 print('Data size:')
-print(dataset.data.shape)
+print(dataset.data.shape) # data shape has 124800 letters, 28x28 images
 
-images = dataset.data.view([124800, 1, 28, 28]).float()
+images = dataset.data.view([124800, 1, 28, 28]).float() # convert to 4D tensor data
+# 124800 letter iamges, 1 image channel, 28x28 images
 print('Tensor data:')
 print(images.shape)
 
@@ -40,8 +41,10 @@ torch.unique(dataset.targets)
 
 dataset.class_to_idx
 
+# eliminate the 1st class 'N/A'
 letterCategories = dataset.classes[1:]
 
+# re-label all the other entries, subtracting 1 to realign them
 labels = copy.deepcopy(dataset.targets)-1
 print(labels.shape)
 
@@ -81,8 +84,10 @@ images /= torch.max(images)
 
 # plt.show()
 
+# split arrays into training/testing datasets
 train_data, test_data, train_labels, test_labels = sklearn.model_selection.train_test_split(images, labels, test_size=.1)
 
+# convert arrays into pytorch dataset
 train_data = TensorDataset(train_data, train_labels)
 test_data = TensorDataset(test_data, test_labels)
 
@@ -90,6 +95,7 @@ test_data = TensorDataset(test_data, test_labels)
 setbatchsize = input("Enter batch size (8, 16, 32, 64, 128) [Higher batch size = Faster, but more CPU]: ")
 
 batchsize = int(setbatchsize)
+# create DataLoader objects that handle the data, batch size, and shuffling between epochs
 train_loader = DataLoader(train_data, batch_size=batchsize, shuffle=True, drop_last=True)
 test_loader = DataLoader(test_data, batch_size=test_data.tensors[0].shape[0])
 
@@ -106,22 +112,24 @@ def createNN(printtoggle=False):
 
             self.print = printtoggle
 
+            # convolutional layers: extract key features like edges, textures, and shapes
             self.conv1 = nn.Conv2d(1, 6, 3, padding=1)
-            self.bnorm1 = nn.BatchNorm2d(6)
+            self.bnorm1 = nn.BatchNorm2d(6) # batch normalization: can accelerate training convergence and leads to improved generalization performance
 
             self.conv2 = nn.Conv2d(6, 6, 3, padding=1)
             self.bnorm2 = nn.BatchNorm2d(6)
 
-
+            # fully connected layers are responsible for taking the high-level features extracted by the convolutional layers and transforming them into the final output of the network
             self.fc1 = nn.Linear(7*7*6, 50)
-            self.fc2 = nn.Linear(50, 26)
+            self.fc2 = nn.Linear(50, 26) # reshapes the original output down to the 26 letters we have
         
         def forward(self, x):
             if self.print: 
                 print(f'Input: {list(x.shape)}')
-                
+            
+            # convolutional layer -> max pool -> batch normalization -> relu
             x = F.max_pool2d(self.conv1(x), 2)
-            x = F.leaky_relu(self.bnorm1(x))
+            x = F.leaky_relu(self.bnorm1(x)) # leaky relu prevents neurons from dying completely, allowing the nn to handle more complex data
             if self.print:
                 print(f'First CPR block: {list(x.shape)}')
             
@@ -145,9 +153,9 @@ def createNN(printtoggle=False):
     
     net = emnistnet(printtoggle)
 
-    lossfunction = nn.CrossEntropyLoss()
+    lossfunction = nn.CrossEntropyLoss() # cross entropy loss works with data classification, compares predicted values to true values and penalizes NN based on discrepancy
 
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.001) # optimization algorithm that will adjust the learning rate during training as needed
 
     return net, lossfunction, optimizer
 
@@ -261,10 +269,9 @@ def trainModel(epochs, printing):
 
 # USAGE
 numepochs = int(input("Enter number of epochs: "))
-printstatements = input("Do you want to print statements during training? (y/n): ")
 printstatementsTF = False
-if printstatements == "y":
-    printstatementsTF == True
+printstatements = input("Do you want to print statements during training? (y/n): ")
+printstatementsTF = True if printstatements == "y" else False
 trainLoss, testLoss, trainErr, testErr, net = trainModel(numepochs, printstatementsTF)
 
 fig, ax = plt.subplots(1, 2, figsize=(16, 5))
