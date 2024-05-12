@@ -10,7 +10,7 @@ Installation Guide:
 
 Make sure have  requirements fullfilled and all libraries installed, if not you may install them by executing the following in your terminal:
 
-pip install numpy scikit-learn torch torchvision matplotlib ipython
+pip install -r requirements.txt
 
 1. Execute the "proj.py" Python-script
    
